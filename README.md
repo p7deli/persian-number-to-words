@@ -30,7 +30,7 @@ pip install persian-number-to-words
 ### نصب در حالت توسعه (لوکال)
 
 ```bash
-git clone https://github.com/your-username/persian-number-to-words.git
+git clone https://github.com/p7deli/persian-number-to-words.git
 cd persian-number-to-words
 pip install -e .
 ```
