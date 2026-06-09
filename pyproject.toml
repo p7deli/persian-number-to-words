@@ -1,28 +1,23 @@
 [build-system]
-requires = ["setuptools>=65.0", "wheel"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "persian-number-to-words"
-version = "1.0.0"
-description = "تبدیل اعداد به حروف فارسی و انگلیسی به صورت حرفه‌ای و مالی"
+name = "persian-number-to-word"      # اسم پکیج در PyPI
+version = "1.1.0"                     # شماره نسخه
+description = "تبدیل اعداد به حروف فارسی بدون محدودیت"
 readme = "README.md"
+authors = [{ name = "Poriya", email = "poria.dell7@gmail.com" }]
 license = { text = "MIT" }
-authors = [
-    { name = "Pouria", email = "your-email@example.com" }
-]
-keywords = ["persian", "number", "words", "fa", "english", "financial"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent"
+    "Operating System :: OS Independent",
 ]
-dependencies = []
+requires-python = ">=3.6"
 
 [project.urls]
-Homepage = "https://github.com/your-username/persian-number-to-words"
-Repository = "https://github.com/your-username/persian-number-to-words"
-Documentation = "https://github.com/your-username/persian-number-to-words#readme"
+Homepage = "https://github.com/p7deli/persian-number-to-word"
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"]

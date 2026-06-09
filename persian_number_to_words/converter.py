@@ -1,3 +1,4 @@
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Union, Literal, Optional
 from .models import NumberResult
 from .utils import normalize_input, format_number
@@ -34,6 +35,16 @@ def _three_digit_to_words(n: int, lang: LangType):
     return joiner.join(words)
 
 
+def _get_scale_name(index: int, lang: LangType):
+    SCALES = SCALES_FA if lang == "fa" else SCALES_EN
+    if index < len(SCALES):
+        return SCALES[index]
+
+    if lang == "fa":
+        return f"۱۰^{index * 3}"
+    return f"10^{index * 3}"
+
+
 def number_to_words(
     number: Union[int, float, str],
     lang: LangType = "fa",
@@ -50,11 +61,11 @@ def number_to_words(
         number = abs(number)
 
     integer_part = int(number)
-    decimal_part = round(number - integer_part, 2)
+    number_text = format(number, "f") if isinstance(number, Decimal) else str(number)
+    _, _, decimal_text = number_text.partition(".")
+    has_decimal = bool(decimal_text and int(decimal_text) != 0)
 
-    SCALES = SCALES_FA if lang == "fa" else SCALES_EN
     joiner = " و " if lang == "fa" else " "
-
     parts = []
     scale_index = 0
 
@@ -62,30 +73,31 @@ def number_to_words(
         chunk = integer_part % 1000
         if chunk:
             words = _three_digit_to_words(chunk, lang)
-            scale = SCALES[scale_index]
+            scale = _get_scale_name(scale_index, lang)
             parts.append(f"{words} {scale}".strip())
         integer_part //= 1000
         scale_index += 1
 
-    words = joiner.join(reversed(parts)) if parts else ("صفر" if lang=="fa" else "zero")
+    words = joiner.join(reversed(parts)) if parts else ("صفر" if lang == "fa" else "zero")
 
-    # financial mode
-    if mode == "financial" and decimal_part:
-        decimal_value = int(round(decimal_part * 100))
+    if mode == "financial" and has_decimal:
+        if isinstance(number, Decimal):
+            decimal_value = int(((number - int(number)) * 100).to_integral_value(rounding=ROUND_HALF_UP))
+        else:
+            decimal_value = int(round((number - int(number)) * 100))
+
         decimal_words = _three_digit_to_words(decimal_value, lang)
-
         if lang == "fa":
             words = f"{words} {currency or ''} و {decimal_words} ریال"
         else:
             words = f"{words} {currency or ''} and {decimal_words} cents"
     else:
-        if decimal_part:
-            decimal_digits = str(decimal_part).split(".")[1]
+        if has_decimal:
             if lang == "fa":
-                decimal_words = " ".join(ONES_FA[int(d)] for d in decimal_digits)
+                decimal_words = " ".join(ONES_FA[int(d)] for d in decimal_text)
                 words += f" ممیز {decimal_words}"
             else:
-                decimal_words = " ".join(ONES_EN[int(d)] for d in decimal_digits)
+                decimal_words = " ".join(ONES_EN[int(d)] for d in decimal_text)
                 words += f" point {decimal_words}"
 
     if currency and mode != "financial":
